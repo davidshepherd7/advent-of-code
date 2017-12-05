@@ -10,32 +10,18 @@ fn main() {
     assert!(f(12) == 3);
     assert!(f(23) == 2);
     assert!(f(1024) == 31);
-
-    // println!("f(325489): {}", f(325489));
-
+    println!("f(325489): {}", f(325489));
 
 
-    let mut memo: HashMap<(i32, i32), u32> = HashMap::new();
-
-    assert!(g(0, 0, &mut memo) == 1);
-
+    // Test the comparator function
     let points = vec![(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1),
                       (2, -1), (2, 0), (2, 1), (2, 2), (1, 2)];
-
-    // for p in points.clone() {
-    //     let comp = comparator(&p);
-    //     println!("point: {} {}, comparator: {} {} {}", p.0, p.1, comp.0, comp.1, comp.2);
-    // }
-
     let mut sorted = points.clone();
     sorted.sort_by_key(comparator);
-    // println!("sort order");
-    // for p in sorted.clone() {
-    //     println!("point: {} {}", p.0, p.1);
-    // }
     assert!(sorted.iter().eq(points.iter()));
 
-    // println!("{}", g(5,4, &mut memo));
+    // Global hashmap for memoization
+    let mut memo: HashMap<(i32, i32), u32> = HashMap::new();
 
     assert!(g(0, 0, &mut memo) == 1);
     assert!(g(1, 0, &mut memo) == 1);
@@ -45,21 +31,16 @@ fn main() {
     assert!(g(-2, -2, &mut memo) == 362);
     assert!(g(1, -1, &mut memo) == 25);
 
-    // 147  142  133  122   59
-    // 304    5    4    2   57
-    // 330   10    1    1   54
-    // 351   11   23   25   26
-    // 362  747  806--->   ...
 
-    // cartesian product, not in stdlib
-    let mut all_pairs = Vec::new();
+    // cartesian product, not in stdlib for some reason :(
+    let mut cart_prod = Vec::new();
     for i in -5..5 {
         for j in -5..5 {
-            all_pairs.push((i, j));
+            cart_prod.push((i, j));
         }
     }
 
-    let result = all_pairs
+    let result = cart_prod
         .iter()
         .map(|&(i, j)| (i, j, g(i, j, &mut memo)))
         .filter(|&(_, _, v)| v.clone() > 325489)
@@ -69,7 +50,7 @@ fn main() {
     println!("({} {}): {}", result.0, result.1, result.2);
 }
 
-
+// Part 2
 fn g(ix: i32, iy: i32, mut hash: &mut HashMap<(i32, i32), u32>) -> u32 {
     if ix == 0 && iy == 0 {
         return 1;
@@ -80,60 +61,58 @@ fn g(ix: i32, iy: i32, mut hash: &mut HashMap<(i32, i32), u32>) -> u32 {
     }
 
     let out = [(-1,  1), (0,  1), ( 1,  1),
-            (-1,  0),          ( 1,  0),
-            (-1, -1), (0, -1), ( 1, -1)].iter()
+               (-1,  0),          ( 1,  0),
+               (-1, -1), (0, -1), ( 1, -1)]
+        .iter()
         .map(|&(dx, dy)| (ix + dx, iy + dy))
-        .filter(|other| is_before(other, &(ix, iy)))
+        .filter(|other| comparator(other) < comparator(&(ix, iy)))
         .map(|(ox, oy)| g(ox, oy, &mut hash))
         .sum();
 
     hash.insert((ix, iy), out);
+
     return out;
 }
 
-fn is_before(p1: &(i32, i32), p2: &(i32, i32)) -> bool {
-    return comparator(p1) < comparator(p2);
-}
-
+// Make a tuple which can be used to compare how far around the spiral a point
+// is.
 fn comparator(p: &(i32, i32)) -> (u32, u32, i32) {
     let side: u32;
     let side_steps: i32;
 
     if p.0.abs() > p.1.abs() {
+        // right
         if p.0 >= 0 {
             side = 0;
             side_steps = p.1
-        } else {
+        }
+         // left
+        else {
             side = 2;
             side_steps = -p.1
         };
     }
     else {
+        // top
         if p.1 > 0 {
             side = 1;
             side_steps = -p.0;
         }
+        // bottom
         else {
             side = 3;
             side_steps = p.0;
         };
     }
 
-    return (shell(p), side, side_steps);
+    let shell = cmp::max(p.0.abs(), p.1.abs()) as u32;
+
+    return (shell, side, side_steps);
 }
 
-fn shell(p: &(i32, i32)) -> u32 {
-    return cmp::max(p.0.abs(), p.1.abs()) as u32;
-}
 
 
-
-
-
-
-
-
-
+// Part 1
 fn f(one_indexed_position: u32) -> u32 {
     assert!(one_indexed_position > 0);
 

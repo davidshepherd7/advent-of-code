@@ -47,10 +47,10 @@ fn no_duplicate_words(phrase: &str) -> bool {
 fn no_anagram_words(phrase: &str) -> bool {
     let word_count = phrase.split_whitespace().count();
 
-    let mut deduped = phrase.split_whitespace().map(sort_string).collect::<Vec<&str>>();
+    let mut deduped = phrase.split_whitespace().map(sort_string).collect::<Vec<String>>();
     deduped.sort();
     deduped.dedup();
-    return word_count == deduped.len()_
+    return word_count == deduped.len();
 }
 
 fn sort_string(word: &str) -> String {

@@ -1,0 +1,4 @@
+[package]
+name = "aoc"
+version = "0.1.0"
+authors = ["David Shepherd <davidshepherd7@gmail.com>"]

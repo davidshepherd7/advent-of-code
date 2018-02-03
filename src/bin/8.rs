@@ -94,7 +94,8 @@ fn run_instruction<'a>(inst: &Instruction<'a>, registers: &mut Registers<'a>) {
 
 
 fn should_run<'a>(inst: &Instruction<'a>, registers: &Registers<'a>) -> bool {
-    let operand = registers.get(inst.conditional_operand).unwrap_or(&0);
+    let zero = 0;
+    let operand = registers.get(inst.conditional_operand).unwrap_or(&zero);
 
     match inst.conditional_operation {
         "<" => operand < &inst.conditional_value,
